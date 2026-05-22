@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: asp-postgres
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: asp
+      POSTGRES_PASSWORD: asp_dev_password
+      POSTGRES_DB: antigravity_signal
+    volumes:
+      - asp_pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U asp -d antigravity_signal"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  asp_pg_data:

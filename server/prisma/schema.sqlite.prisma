@@ -1,0 +1,95 @@
+// Local dev fallback when Docker/PostgreSQL is unavailable.
+// Use: npm run db:migrate:sqlite
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+enum Tier {
+  STARTER
+  PRO
+  ELITE
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCEEDED
+  FAILED
+  REFUNDED
+}
+
+model User {
+  id               String    @id @default(cuid())
+  email            String    @unique
+  passwordHash     String
+  firstName        String
+  lastName         String
+  country          String?
+  phone            String?
+  investmentLevel  String?
+  tier             Tier      @default(STARTER)
+  balance          Decimal   @default(0)
+  stripeCustomerId String?   @unique
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  subscriptions Subscription[]
+  payments      Payment[]
+}
+
+model WaitlistEntry {
+  id              String   @id @default(cuid())
+  firstName       String
+  lastName        String
+  email           String
+  phone           String?
+  country         String
+  investmentLevel String
+  packageInterest String?
+  submittedAt     DateTime @default(now())
+}
+
+model Subscription {
+  id                   String    @id @default(cuid())
+  userId               String
+  user                 User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tier                 Tier
+  stripeSubscriptionId String?   @unique
+  stripePriceId        String?
+  status               String    @default("inactive")
+  currentPeriodEnd     DateTime?
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+}
+
+model Payment {
+  id                    String        @id @default(cuid())
+  userId                String
+  user                  User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tier                  Tier
+  amountCents           Int
+  currency              String        @default("usd")
+  status                PaymentStatus @default(PENDING)
+  stripeCheckoutId      String?       @unique
+  stripePaymentIntentId String?       @unique
+  createdAt             DateTime      @default(now())
+}
+
+model Signal {
+  id            String   @id @default(cuid())
+  asset         String
+  action        String
+  bias          String
+  confidencePct Int
+  entryPrice    Decimal
+  takeProfit    Decimal
+  stopLoss      Decimal
+  timeframe     String
+  modelVersion  String
+  status        String   @default("OPEN")
+  createdAt     DateTime @default(now())
+}

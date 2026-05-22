@@ -1,0 +1,10 @@
+# Railway deploy config — set Root Directory to /server in the Railway dashboard
+[build]
+builder = "NIXPACKS"
+buildCommand = "npm run build"
+
+[deploy]
+startCommand = "npm start"
+healthcheckPath = "/api/health"
+healthcheckTimeout = 120
+restartPolicyType = "ON_FAILURE"

@@ -1,0 +1,28 @@
+{
+  "name": "antigravity-signal-platform",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "dev:api": "npm run dev --prefix server",
+    "dev:all": "concurrently -n web,api -c cyan,green \"vite\" \"npm run dev --prefix server\"",
+    "build": "vite build",
+    "preview": "vite preview",
+    "db:up": "bash scripts/start-database.sh",
+    "db:migrate": "npm run db:migrate --prefix server",
+    "db:install-native": "bash scripts/install-postgres-native.sh"
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "recharts": "^3.8.1"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.1",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.1",
+    "concurrently": "^9.2.1",
+    "vite": "^5.4.1"
+  }
+}

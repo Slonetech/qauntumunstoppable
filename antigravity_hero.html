@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<!-- DEPRECATED: Static prototype superseded by src/AntigravityHero.jsx — safe to delete. -->
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Antigravity Signal — Intelligent Multi-Asset Trading</title>
+  <meta name="description" content="Antigravity deploys machine learning across Forex, Crypto, and Stocks — delivering institutional-grade signals to every investor tier. Real data. Real edge." />
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    html,body{height:100%;background:#080C12}
+    @keyframes livePulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.3;transform:scale(0.8)}}
+    @keyframes glowPulse{0%,100%{opacity:0.4}50%{opacity:0.9}}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes fadeDown{from{opacity:0;transform:translateY(-16px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes countUp{from{opacity:0}to{opacity:1}}
+    .asp-nav-link{color:#4A6880;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;transition:color 0.2s;font-family:'Courier New',monospace}
+    .asp-nav-link:hover{color:#E2E8F0}
+    .asp-btn-p{background:#00B4D8;color:#000;border:none;padding:11px 24px;border-radius:6px;font-family:'Courier New',monospace;font-size:11px;font-weight:700;letter-spacing:0.1em;cursor:pointer;text-transform:uppercase;transition:all 0.2s}
+    .asp-btn-p:hover{background:#33C6E8;transform:translateY(-1px)}
+    .asp-btn-s{background:transparent;color:#A8C4D8;border:1px solid #0F2033;padding:11px 24px;border-radius:6px;font-family:'Courier New',monospace;font-size:11px;letter-spacing:0.1em;cursor:pointer;text-transform:uppercase;transition:all 0.2s}
+    .asp-btn-s:hover{border-color:#00B4D8;color:#00B4D8}
+    .sig-row{border-bottom:1px solid #0F2033;transition:background 0.15s}
+    .sig-row:last-child{border-bottom:none}
+    .sig-row:hover{background:rgba(0,180,216,0.04)}
+    .ticker-track{display:flex;will-change:transform}
+    .ticker-item{display:flex;align-items:center;gap:10px;padding:8px 20px;border-right:1px solid #0F2033;min-width:180px;flex-shrink:0}
+  </style>
+</head>
+<body>
+
+<div style="background:#080C12;font-family:'Courier New',monospace;color:#E2E8F0;position:relative;overflow:hidden;min-height:100vh">
+
+  <!-- grid texture -->
+  <div style="position:absolute;inset:0;background-image:linear-gradient(#0F203340 1px,transparent 1px),linear-gradient(90deg,#0F203340 1px,transparent 1px);background-size:60px 60px;pointer-events:none;z-index:0"></div>
+
+  <!-- glow -->
+  <div style="position:absolute;top:-100px;left:50%;transform:translateX(-50%);width:560px;height:280px;background:radial-gradient(ellipse,#00B4D820 0%,transparent 70%);pointer-events:none;z-index:0;animation:glowPulse 4s ease-in-out infinite"></div>
+
+  <!-- NAV -->
+  <nav style="position:relative;z-index:10;background:#080C12E0;border-bottom:1px solid #0F2033;padding:0 28px">
+    <div style="max-width:1100px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:56px">
+      <div style="display:flex;align-items:center;gap:8px">
+        <div style="width:7px;height:7px;background:#00B4D8;border-radius:50%;animation:livePulse 2s ease-in-out infinite"></div>
+        <span style="font-size:13px;font-weight:700;letter-spacing:0.14em;color:#E2E8F0">ANTIGRAVITY</span>
+        <span style="font-size:9px;color:#4A7C9E;letter-spacing:0.1em;margin-left:2px">SIGNAL</span>
+      </div>
+      <div style="display:flex;gap:28px;align-items:center">
+        <span class="asp-nav-link">Markets</span>
+        <span class="asp-nav-link">Signals</span>
+        <span class="asp-nav-link">Leaders</span>
+        <span class="asp-nav-link">Packages</span>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="asp-btn-s" style="padding:7px 16px;font-size:10px">Login</button>
+        <button class="asp-btn-p" style="padding:7px 16px;font-size:10px">Get Started</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- TICKER -->
+  <div style="background:#0D1B2A;border-bottom:1px solid #0F2033;overflow:hidden;position:relative;z-index:10">
+    <div style="display:flex;align-items:center">
+      <div style="background:#00B4D8;color:#000;font-size:9px;font-weight:700;letter-spacing:0.14em;padding:8px 14px;white-space:nowrap;flex-shrink:0;z-index:2">LIVE MARKETS</div>
+      <div style="overflow:hidden;flex:1" id="ticker-outer">
+        <div class="ticker-track" id="ticker-inner">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HERO -->
+  <div style="position:relative;z-index:10;max-width:1100px;margin:0 auto;padding:64px 28px 48px">
+
+    <!-- badge -->
+    <div id="badge" style="display:inline-flex;align-items:center;gap:8px;background:#0D1B2A;border:1px solid #0F2033;border-radius:4px;padding:6px 14px;margin-bottom:28px;opacity:0;animation:fadeDown 0.5s ease 0.1s forwards">
+      <span style="width:6px;height:6px;border-radius:50%;background:#00D26A;display:inline-block;animation:livePulse 1.4s ease-in-out infinite"></span>
+      <span style="font-size:9px;color:#4A7C9E;letter-spacing:0.12em">AI ENGINE ACTIVE</span>
+      <span style="width:1px;height:12px;background:#0F2033"></span>
+      <span id="sig-count" style="font-size:9px;color:#00D26A;font-weight:700;letter-spacing:0.08em">847 SIGNALS TODAY</span>
+    </div>
+
+    <!-- headline + right col -->
+    <div style="display:flex;gap:48px;align-items:flex-start;flex-wrap:wrap">
+
+      <!-- left -->
+      <div style="flex:1;min-width:280px">
+        <h1 style="font-size:clamp(30px,4.5vw,54px);font-weight:700;line-height:1.05;letter-spacing:-0.03em;margin-bottom:0;opacity:0;animation:fadeUp 0.7s ease 0.2s forwards">
+          <span style="display:block;color:#E2E8F0">INTELLIGENT</span>
+          <span style="display:block;color:#00B4D8">MULTI-ASSET</span>
+          <span style="display:block;color:#E2E8F0">TRADING</span>
+        </h1>
+        <p style="font-size:13px;color:#A8C4D8;line-height:1.75;margin:24px 0 24px;max-width:420px;opacity:0;animation:fadeUp 0.7s ease 0.4s forwards">
+          Antigravity deploys machine learning across Forex, Crypto, and Stocks — delivering institutional-grade signals to every investor tier. Real data. Real edge.
+        </p>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;opacity:0;animation:fadeUp 0.6s ease 0.55s forwards">
+          <button class="asp-btn-p">Start Trading →</button>
+          <button class="asp-btn-s">View Live Signals</button>
+        </div>
+        <div style="display:flex;gap:18px;margin-top:18px;flex-wrap:wrap;opacity:0;animation:fadeUp 0.6s ease 0.7s forwards">
+          <span style="display:flex;align-items:center;gap:5px;font-size:9px;color:#4A6880;letter-spacing:0.07em"><span style="color:#00D26A">✓</span>NO HIDDEN FEES</span>
+          <span style="display:flex;align-items:center;gap:5px;font-size:9px;color:#4A6880;letter-spacing:0.07em"><span style="color:#00D26A">✓</span>CANCEL ANYTIME</span>
+          <span style="display:flex;align-items:center;gap:5px;font-size:9px;color:#4A6880;letter-spacing:0.07em"><span style="color:#00D26A">✓</span>3MS LATENCY</span>
+        </div>
+      </div>
+
+      <!-- stat cards -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;min-width:260px;max-width:340px;opacity:0;animation:fadeUp 0.7s ease 0.45s forwards">
+        <div style="background:#0D1B2A;border:1px solid #0F2033;border-radius:10px;padding:18px 20px">
+          <div style="font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:#4A7C9E;margin-bottom:8px">Win Rate</div>
+          <div id="stat-wr" style="font-size:26px;font-weight:700;color:#00D26A;letter-spacing:-0.02em">0%</div>
+        </div>
+        <div style="background:#0D1B2A;border:1px solid #0F2033;border-radius:10px;padding:18px 20px">
+          <div style="font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:#4A7C9E;margin-bottom:8px">Volume</div>
+          <div id="stat-vol" style="font-size:26px;font-weight:700;color:#00B4D8;letter-spacing:-0.02em">$0M</div>
+        </div>
+        <div style="background:#0D1B2A;border:1px solid #0F2033;border-radius:10px;padding:18px 20px">
+          <div style="font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:#4A7C9E;margin-bottom:8px">Traders</div>
+          <div id="stat-tr" style="font-size:22px;font-weight:700;color:#E2E8F0;letter-spacing:-0.02em">0</div>
+        </div>
+        <div style="background:#0D1B2A;border:1px solid #0F2033;border-radius:10px;padding:18px 20px">
+          <div style="font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:#4A7C9E;margin-bottom:8px">Latency</div>
+          <div id="stat-lat" style="font-size:26px;font-weight:700;color:#FFB700;letter-spacing:-0.02em">0ms</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SIGNAL FEED -->
+    <div style="margin-top:48px;background:#0D1B2A;border:1px solid #0F2033;border-radius:12px;overflow:hidden;opacity:0;animation:fadeUp 0.7s ease 0.8s forwards">
+
+      <!-- feed header -->
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:13px 20px;border-bottom:1px solid #0F2033;flex-wrap:wrap;gap:8px">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span style="width:6px;height:6px;border-radius:50%;background:#00D26A;display:inline-block;animation:livePulse 1.4s ease-in-out infinite"></span>
+          <span style="font-size:10px;font-weight:700;letter-spacing:0.12em;color:#E2E8F0">ANTIGRAVITY SIGNAL FEED</span>
+          <span style="background:#0A1E2A;color:#00B4D8;border:1px solid #00B4D833;font-size:9px;padding:2px 8px;border-radius:3px;letter-spacing:0.08em">MODEL v4.2 ACTIVE</span>
+        </div>
+        <div style="display:flex;gap:14px">
+          <span style="font-size:9px;color:#4A7C9E;letter-spacing:0.1em">MULTI-ASSET</span>
+          <span style="font-size:9px;color:#4A7C9E;letter-spacing:0.1em">REAL-TIME</span>
+          <span style="font-size:9px;color:#4A7C9E;letter-spacing:0.1em">AI-POWERED</span>
+        </div>
+      </div>
+
+      <!-- table -->
+      <div style="overflow-x:auto">
+        <table style="width:100%;border-collapse:collapse;min-width:560px">
+          <thead>
+            <tr style="border-bottom:1px solid #0F2033">
+              <th style="padding:8px 14px 8px 20px;text-align:left;font-size:9px;font-weight:400;letter-spacing:0.1em;text-transform:uppercase;color:#4A7C9E">Asset</th>
+              <th style="padding:8px 14px 8px 0;text-align:left;font-size:9px;font-weight:400;letter-spacing:0.1em;text-transform:uppercase;color:#4A7C9E">Action</th>
+              <th style="padding:8px 14px 8px 0;text-align:left;font-size:9px;font-weight:400;letter-spacing:0.1em;text-transform:uppercase;color:#4A7C9E">Conf.</th>
+              <th style="padding:8px 14px 8px 0;text-align:left;font-size:9px;font-weight:400;letter-spacing:0.1em;text-transform:uppercase;color:#4A7C9E">Entry</th>
+              <th style="padding:8px 14px 8px 0;text-align:left;font-size:9px;font-weight:400;letter-spacing:0.1em;text-transform:uppercase;color:#4A7C9E">TP / SL</th>
+              <th style="padding:8px 20px 8px 0;text-align:left;font-size:9px;font-weight:400;letter-spacing:0.1em;text-transform:uppercase;color:#4A7C9E">P&amp;L</th>
+            </tr>
+          </thead>
+          <tbody id="signal-body"></tbody>
+        </table>
+      </div>
+
+      <!-- feed footer -->
+      <div style="padding:13px 20px;border-top:1px solid #0F2033;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+        <div style="display:flex;gap:24px;flex-wrap:wrap">
+          <div><div style="font-size:9px;color:#4A7C9E;letter-spacing:0.08em;margin-bottom:3px">30-DAY WIN RATE</div><div style="font-size:14px;font-weight:700;color:#00D26A">78%</div></div>
+          <div><div style="font-size:9px;color:#4A7C9E;letter-spacing:0.08em;margin-bottom:3px">AVG. ROI / SIGNAL</div><div style="font-size:14px;font-weight:700;color:#00B4D8">+2.4%</div></div>
+          <div><div style="font-size:9px;color:#4A7C9E;letter-spacing:0.08em;margin-bottom:3px">SIGNALS THIS MONTH</div><div style="font-size:14px;font-weight:700;color:#A8C4D8">1,247</div></div>
+          <div><div style="font-size:9px;color:#4A7C9E;letter-spacing:0.08em;margin-bottom:3px">MODEL ACCURACY</div><div style="font-size:14px;font-weight:700;color:#FFB700">94%</div></div>
+        </div>
+        <button class="asp-btn-s" style="font-size:10px;padding:6px 14px">View All Signals →</button>
+      </div>
+    </div>
+
+    <!-- disclaimer -->
+    <p style="margin-top:20px;font-size:9px;color:#4A6880;letter-spacing:0.04em;line-height:1.7;text-align:center">
+      Past performance is not indicative of future results. Trading involves significant risk of loss. Antigravity provides signal intelligence tools only and does not constitute financial advice.
+    </p>
+  </div>
+</div>
+
+<script>
+const TICKER = [
+  {pair:"BTC/USD",price:"67,842.50",change:"+2.34%",up:true},
+  {pair:"ETH/USD",price:"3,521.80",change:"+1.87%",up:true},
+  {pair:"EUR/USD",price:"1.0921",change:"-0.12%",up:false},
+  {pair:"XAU/USD",price:"2,341.60",change:"+0.78%",up:true},
+  {pair:"GBP/USD",price:"1.2648",change:"-0.09%",up:false},
+  {pair:"SOL/USD",price:"182.40",change:"+4.21%",up:true},
+  {pair:"NAS100",price:"19,284.00",change:"+0.55%",up:true},
+  {pair:"USD/JPY",price:"154.32",change:"+0.31%",up:true},
+  {pair:"XRP/USD",price:"0.6182",change:"-1.44%",up:false},
+  {pair:"SPX500",price:"5,432.10",change:"+0.22%",up:true},
+];
+
+const SIGNALS = [
+  {asset:"BTC/USD",action:"BUY",conf:94,entry:"67,842",tp:"72,100",sl:"65,400",pnl:"+$312.50",up:true},
+  {asset:"EUR/USD",action:"SELL",conf:71,entry:"1.0921",tp:"1.0850",sl:"1.0980",pnl:"−$42.00",up:false},
+  {asset:"XAU/USD",action:"BUY",conf:88,entry:"2,341",tp:"2,398",sl:"2,298",pnl:"+$184.20",up:true},
+  {asset:"ETH/USD",action:"BUY",conf:91,entry:"3,521",tp:"3,740",sl:"3,380",pnl:"+$96.40",up:true},
+  {asset:"GBP/JPY",action:"SELL",conf:76,entry:"194.82",tp:"193.10",sl:"196.00",pnl:"−$28.70",up:false},
+];
+
+// Build ticker
+const inner = document.getElementById('ticker-inner');
+const outer = document.getElementById('ticker-outer');
+[...TICKER,...TICKER,...TICKER].forEach(item => {
+  const el = document.createElement('div');
+  el.className = 'ticker-item';
+  el.innerHTML = `<span style="font-size:11px;color:#6B8FA8;letter-spacing:0.06em">${item.pair}</span><span style="font-size:12px;font-weight:700;color:#E2E8F0">${item.price}</span><span style="font-size:10px;font-weight:700;color:${item.up?'#00D26A':'#FF4D4D'}">${item.change}</span>`;
+  inner.appendChild(el);
+});
+
+// Animate ticker
+let offset = 0;
+const singleW = TICKER.length * 180;
+(function tick(){
+  offset -= 0.5;
+  if(Math.abs(offset) >= singleW) offset = 0;
+  inner.style.transform = `translateX(${offset}px)`;
+  requestAnimationFrame(tick);
+})();
+
+// Build signal rows
+const tbody = document.getElementById('signal-body');
+SIGNALS.forEach((sig,i) => {
+  const tr = document.createElement('tr');
+  tr.className = 'sig-row';
+  tr.style.opacity = '0';
+  tr.style.transform = 'translateX(-10px)';
+  tr.style.transition = 'background 0.15s, opacity 0.4s ease, transform 0.4s ease';
+  tr.innerHTML = `
+    <td style="padding:11px 14px 11px 20px;color:#E2E8F0;font-size:12px;white-space:nowrap">${sig.asset}</td>
+    <td style="padding:11px 14px 11px 0"><span style="display:inline-block;padding:2px 9px;border-radius:3px;font-size:10px;font-weight:700;letter-spacing:0.06em;background:${sig.up?'#00D26A0F':'#FF4D4D0F'};color:${sig.up?'#00D26A':'#FF4D4D'};border:1px solid ${sig.up?'#00D26A33':'#FF4D4D33'}">${sig.action}</span></td>
+    <td style="padding:11px 14px 11px 0"><span style="display:inline-block;padding:2px 9px;border-radius:3px;font-size:10px;font-weight:700;background:${sig.conf>=85?'#00B4D80F':'#FFB7000F'};color:${sig.conf>=85?'#00B4D8':'#FFB700'};border:1px solid ${sig.conf>=85?'#00B4D833':'#FFB70033'}">${sig.conf}%</span></td>
+    <td style="padding:11px 14px 11px 0;color:#A8C4D8;font-size:12px">${sig.entry}</td>
+    <td style="padding:11px 14px 11px 0;color:#4A6880;font-size:11px">${sig.tp} / ${sig.sl}</td>
+    <td style="padding:11px 20px 11px 0;font-size:12px;font-weight:700;color:${sig.up?'#00D26A':'#FF4D4D'}">${sig.pnl}</td>
+  `;
+  tbody.appendChild(tr);
+  setTimeout(() => { tr.style.opacity='1'; tr.style.transform='translateX(0)'; }, 900 + i*130);
+});
+
+// Animated counters
+function animateCounter(el, target, duration, format, delay){
+  setTimeout(() => {
+    const start = performance.now();
+    (function step(now){
+      const p = Math.min((now - start)/duration, 1);
+      const eased = 1 - Math.pow(1-p, 3);
+      el.textContent = format(Math.floor(eased * target));
+      if(p < 1) requestAnimationFrame(step);
+    })(performance.now());
+  }, delay);
+}
+
+animateCounter(document.getElementById('stat-wr'), 78, 1800, v => v+'%', 500);
+animateCounter(document.getElementById('stat-vol'), 24, 2000, v => '$'+v+'.4M', 650);
+animateCounter(document.getElementById('stat-tr'), 12847, 2200, v => v.toLocaleString(), 800);
+animateCounter(document.getElementById('stat-lat'), 3, 1200, v => v+'ms', 350);
+
+// Live signal count bump
+let sigCount = 847;
+setInterval(() => {
+  sigCount += Math.floor(Math.random()*3) + 1;
+  document.getElementById('sig-count').textContent = sigCount.toLocaleString() + ' SIGNALS TODAY';
+}, 3500);
+</script>
+
+</body>
+</html>
