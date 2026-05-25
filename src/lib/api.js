@@ -53,6 +53,11 @@ export const api = {
         method: 'POST',
         body: JSON.stringify({ packageId }),
       }),
+    checkout: (pkg) =>
+      request('/api/billing/checkout', {
+        method: 'POST',
+        body: JSON.stringify({ package: pkg }),
+      }),
   },
 
   admin: {

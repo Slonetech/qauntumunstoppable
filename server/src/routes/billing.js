@@ -12,7 +12,7 @@ import {
 const router = Router()
 
 const checkoutSchema = z.object({
-  packageId: z.enum(['starter', 'pro', 'elite']),
+  package: z.enum(['STARTER', 'PRO', 'ELITE']),
 })
 
 router.get('/status', (_req, res) => {
@@ -21,7 +21,7 @@ router.get('/status', (_req, res) => {
   })
 })
 
-router.post('/checkout-session', requireAuth, async (req, res) => {
+router.post('/checkout', requireAuth, async (req, res) => {
   try {
     if (!stripe || !config.isStripeConfigured()) {
       return res.status(503).json({
@@ -30,7 +30,8 @@ router.post('/checkout-session', requireAuth, async (req, res) => {
       })
     }
 
-    const { packageId } = checkoutSchema.parse(req.body)
+    const { package: selectedPackage } = checkoutSchema.parse(req.body)
+    const packageId = selectedPackage.toLowerCase()
     const priceId = priceIdForPackage(packageId)
     if (!priceId) {
       return res.status(400).json({ error: 'Invalid package.' })
@@ -55,8 +56,8 @@ router.post('/checkout-session', requireAuth, async (req, res) => {
       mode: 'subscription',
       customer: customerId,
       line_items: [{ price: priceId, quantity: 1 }],
-      success_url: `${config.clientOrigin}/?checkout=success`,
-      cancel_url: `${config.clientOrigin}/?checkout=cancelled`,
+      success_url: `https://qauntumunstoppable.vercel.app?payment=success`,
+      cancel_url: `https://qauntumunstoppable.vercel.app?payment=cancelled`,
       metadata: {
         userId: req.user.id,
         packageId,
@@ -79,7 +80,7 @@ router.post('/checkout-session', requireAuth, async (req, res) => {
     if (err.name === 'ZodError') {
       return res.status(400).json({ error: 'Invalid package selection.' })
     }
-    console.error('[billing/checkout-session]', err)
+    console.error('[billing/checkout]', err)
     return res.status(500).json({ error: 'Could not create checkout session.' })
   }
 })

@@ -54,11 +54,15 @@ export default function App() {
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
-    if (params.get('checkout') === 'success') {
+    if (params.get('payment') === 'success') {
+      alert('Payment successful! Your account has been upgraded.')
       refreshSession().then(() => {
         setShowDashboard(true)
         window.history.replaceState({}, '', window.location.pathname)
       })
+    } else if (params.get('payment') === 'cancelled') {
+      alert('Payment was cancelled.')
+      window.history.replaceState({}, '', window.location.pathname)
     }
   }, [refreshSession])
 
@@ -131,7 +135,7 @@ export default function App() {
       />
       <PriceGrid />
       <Leaderboard />
-      <Pricing onSelectPackage={handleSelectPackage} />
+      <Pricing currentUser={currentUser} onLogin={() => setShowLogin(true)} />
       <Waitlist />
       <Footer onAdminClick={() => setShowAdmin(true)} />
 
@@ -157,14 +161,7 @@ export default function App() {
           }}
         />
       )}
-      {showPayment && selectedPackage && currentUser && (
-        <PaymentModal
-          pkg={selectedPackage}
-          currentUser={currentUser}
-          onClose={() => setShowPayment(false)}
-          onSuccess={handlePaymentSuccess}
-        />
-      )}
+      {/* PaymentModal is bypassed for direct Stripe Checkout redirect */}
       {showDashboard && currentUser && (
         <Dashboard
           currentUser={currentUser}

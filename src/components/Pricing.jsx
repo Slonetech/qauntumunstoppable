@@ -1,3 +1,5 @@
+import { useState } from 'react'
+import { api } from '../lib/api.js'
 import { useBreakpoint } from '../hooks/useBreakpoint.js'
 
 const PLANS = [
@@ -18,8 +20,30 @@ const PLANS = [
   },
 ]
 
-export default function Pricing({ onSelectPackage }) {
+export default function Pricing({ currentUser, onLogin }) {
   const { isTablet } = useBreakpoint()
+  const [loadingId, setLoadingId] = useState(null)
+
+  const handleCheckout = async (planId) => {
+    if (!currentUser) {
+      onLogin()
+      return
+    }
+
+    setLoadingId(planId)
+    try {
+      const { url } = await api.billing.checkout(planId.toUpperCase())
+      if (url) {
+        window.location.href = url
+      } else {
+        alert('Could not retrieve checkout URL.')
+      }
+    } catch (err) {
+      alert(err.message || 'Checkout failed.')
+    } finally {
+      setLoadingId(null)
+    }
+  }
 
   return (
     <section id="packages" style={{ background: '#080C12', padding: isTablet ? '48px 16px' : '80px 32px', borderTop: '1px solid #0F2033' }}>
@@ -56,11 +80,14 @@ export default function Pricing({ onSelectPackage }) {
               </div>
 
               <button
-                onClick={() => onSelectPackage({ id: plan.id, name: plan.name, price: plan.price })}
-                style={{ width: '100%', background: plan.popular ? '#00B4D8' : 'transparent', color: plan.popular ? '#000' : plan.accent, border: `1px solid ${plan.accent}`, padding: '12px', borderRadius: '6px', fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', cursor: 'pointer', fontFamily: "'Courier New',monospace", transition: 'all 0.2s', minHeight: '48px', WebkitTapHighlightColor: 'transparent' }}
-                onMouseEnter={e => { e.currentTarget.style.background = plan.accent; e.currentTarget.style.color = '#000' }}
-                onMouseLeave={e => { e.currentTarget.style.background = plan.popular ? '#00B4D8' : 'transparent'; e.currentTarget.style.color = plan.popular ? '#000' : plan.accent }}
-              >{plan.cta}</button>
+                onClick={() => handleCheckout(plan.id)}
+                disabled={loadingId !== null}
+                style={{ width: '100%', background: plan.popular ? '#00B4D8' : 'transparent', color: plan.popular ? '#000' : plan.accent, border: `1px solid ${plan.accent}`, padding: '12px', borderRadius: '6px', fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', cursor: loadingId !== null ? 'not-allowed' : 'pointer', fontFamily: "'Courier New',monospace", transition: 'all 0.2s', minHeight: '48px', WebkitTapHighlightColor: 'transparent', opacity: loadingId !== null && loadingId !== plan.id ? 0.5 : 1 }}
+                onMouseEnter={e => { if (loadingId === null) { e.currentTarget.style.background = plan.accent; e.currentTarget.style.color = '#000' } }}
+                onMouseLeave={e => { if (loadingId === null) { e.currentTarget.style.background = plan.popular ? '#00B4D8' : 'transparent'; e.currentTarget.style.color = plan.popular ? '#000' : plan.accent } }}
+              >
+                {loadingId === plan.id ? 'Connecting...' : plan.cta}
+              </button>
             </div>
           ))}
         </div>
