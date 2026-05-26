@@ -32,6 +32,7 @@ export async function sendSignalEmail(signal, recipients) {
       `Stop Loss: ${Number(signal.stopLoss)}\n` +
       `Confidence: ${signal.confidencePct}%\n` +
       `Timeframe: ${signal.timeframe}\n` +
+      `Timestamp: ${new Date(signal.createdAt).toUTCString()}\n` +
       `Model Version: ${signal.modelVersion}\n\n` +
       `Access the member dashboard to see full charts and detailed analytics: https://qauntumunstoppable.vercel.app\n\n` +
       `Disclaimer: Past performance is not indicative of future results. Trading involves risk of loss.\n\n` +
@@ -93,8 +94,12 @@ export async function sendSignalEmail(signal, recipients) {
                 </td>
               </tr>
               <tr>
-                <td style="padding: 8px 0; font-size: 11px; color: #4A7C9E; text-transform: uppercase; letter-spacing: 0.08em;">Timeframe</td>
-                <td style="padding: 8px 0; font-size: 13px; color: #A8C4D8; text-align: right;">${signal.timeframe}</td>
+                <td style="padding: 8px 0; font-size: 11px; color: #4A7C9E; text-transform: uppercase; letter-spacing: 0.08em; border-bottom: 1px solid #0F203340;">Timeframe</td>
+                <td style="padding: 8px 0; font-size: 13px; color: #A8C4D8; text-align: right; border-bottom: 1px solid #0F203340;">${signal.timeframe}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; font-size: 11px; color: #4A7C9E; text-transform: uppercase; letter-spacing: 0.08em;">Timestamp</td>
+                <td style="padding: 8px 0; font-size: 13px; color: #A8C4D8; text-align: right;">${new Date(signal.createdAt).toUTCString()}</td>
               </tr>
             </table>
           </div>
@@ -116,7 +121,7 @@ export async function sendSignalEmail(signal, recipients) {
     return {
       to: recipient.email,
       from: fromEmail,
-      subject: `⚡ New ${signal.asset} ${signal.action} Signal — ASP`,
+      subject: `🚀 New Antigravity Signal: ${signal.asset} ${signal.action}`,
       text,
       html,
     }

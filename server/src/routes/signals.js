@@ -43,6 +43,22 @@ router.get('/', requireAuth, async (req, res) => {
   }
 })
 
+router.get('/history', requireAuth, async (req, res) => {
+  try {
+    const rows = await prisma.signal.findMany({
+      orderBy: { createdAt: 'desc' },
+      take: 20,
+    })
+
+    return res.json({
+      signals: rows.map(serializeSignal),
+    })
+  } catch (err) {
+    console.error('[signals/history]', err)
+    return res.status(500).json({ error: 'Failed to load signal history.' })
+  }
+})
+
 router.post('/', requireAuth, async (req, res) => {
   try {
     const data = createSignalSchema.parse(req.body)

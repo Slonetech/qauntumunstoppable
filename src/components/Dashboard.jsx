@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { api } from '../lib/api.js'
 import { toDisplaySignal } from '../lib/signalFormat.js'
 
@@ -11,7 +11,80 @@ const TRADERS = [
 ]
 const TIER_COLOR = { Starter: '#4A6880', Pro: '#00B4D8', Elite: '#FFB700' }
 const MEDALS = { 1: '🥇', 2: '🥈', 3: '🥉' }
-const TABS = ['Overview', 'Signals', 'Leaderboard', 'Settings']
+const TABS = ['Overview', 'Signals', 'Charts', 'History', 'Leaderboard', 'Settings']
+
+const CHART_ASSETS = [
+  { name: 'BTC/USD', symbol: 'BINANCE:BTCUSDT' },
+  { name: 'ETH/USD', symbol: 'BINANCE:ETHUSDT' },
+  { name: 'XRP/USD', symbol: 'BINANCE:XRPUSDT' },
+  { name: 'EUR/USD', symbol: 'FX:EURUSD' },
+  { name: 'GBP/USD', symbol: 'FX:GBPUSD' },
+  { name: 'GOLD', symbol: 'OANDA:XAUUSD' },
+]
+
+function TradingViewWidget({ symbol }) {
+  const containerRef = useRef(null)
+
+  useEffect(() => {
+    const scriptId = 'tradingview-widget-script'
+    let script = document.getElementById(scriptId)
+
+    const initWidget = () => {
+      if (containerRef.current && window.TradingView) {
+        containerRef.current.innerHTML = ''
+        const div = document.createElement('div')
+        div.id = `tv-widget-container-${symbol.replace(/[^a-zA-Z0-9]/g, '-')}`
+        div.style.height = '100%'
+        div.style.width = '100%'
+        containerRef.current.appendChild(div)
+
+        new window.TradingView.widget({
+          autosize: true,
+          symbol: symbol,
+          interval: "15",
+          timezone: "Etc/UTC",
+          theme: "dark",
+          style: "1",
+          locale: "en",
+          enable_publishing: false,
+          hide_side_toolbar: true,
+          allow_symbol_change: false,
+          container_id: div.id,
+          hide_legend: false,
+          save_image: false,
+          calendar: false,
+          show_popup_button: false,
+          studies: [
+            "RSI@tv-basicstudies",
+            "MASimple@tv-basicstudies"
+          ]
+        })
+      }
+    }
+
+    if (!script) {
+      script = document.createElement('script')
+      script.id = scriptId
+      script.src = 'https://s3.tradingview.com/tv.js'
+      script.type = 'text/javascript'
+      script.async = true
+      script.onload = initWidget
+      document.head.appendChild(script)
+    } else {
+      if (window.TradingView) {
+        initWidget()
+      } else {
+        script.addEventListener('load', initWidget)
+      }
+    }
+  }, [symbol])
+
+  return (
+    <div style={{ height: '320px', width: '100%', position: 'relative', overflow: 'hidden', borderRadius: '8px', border: '1px solid #0F2033', background: '#080C12' }}>
+      <div ref={containerRef} style={{ height: '100%', width: '100%' }} />
+    </div>
+  )
+}
 
 const inp = { width: '100%', background: '#080C12', border: '1px solid #0F2033', borderRadius: '6px', padding: '10px 14px', color: '#E2E8F0', fontSize: '12px', fontFamily: "'Courier New',monospace", outline: 'none', boxSizing: 'border-box' }
 const lbl = { fontSize: '10px', letterSpacing: '0.1em', color: '#4A7C9E', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }
@@ -24,6 +97,34 @@ export default function Dashboard({ currentUser, onClose, onLogout, onUpdateUser
   const [signals, setSignals] = useState([])
   const [signalsLoading, setSignalsLoading] = useState(true)
   const [signalsError, setSignalsError] = useState('')
+
+  const [activeChart, setActiveChart] = useState(CHART_ASSETS[0])
+  const [historySignals, setHistorySignals] = useState([])
+  const [historyLoading, setHistoryLoading] = useState(false)
+  const [historyError, setHistoryError] = useState('')
+
+  useEffect(() => {
+    if (tab !== 'History') return
+    let cancelled = false
+    setHistoryLoading(true)
+    setHistoryError('')
+    api.signals.history()
+      .then((data) => {
+        if (!cancelled) {
+          setHistorySignals((data.signals || []).map(toDisplaySignal))
+        }
+      })
+      .catch((err) => {
+        if (!cancelled) {
+          setHistoryError(err.message || 'Failed to load signal history.')
+          setHistorySignals([])
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setHistoryLoading(false)
+      })
+    return () => { cancelled = true }
+  }, [tab])
 
   const tier = currentUser?.tier || 'Starter'
   const accentColor = tier === 'Elite' ? '#FFB700' : tier === 'Pro' ? '#00B4D8' : '#4A6880'
@@ -86,9 +187,9 @@ export default function Dashboard({ currentUser, onClose, onLogout, onUpdateUser
           </div>
 
           {/* Tabs */}
-          <div style={{ display: 'flex', gap: '4px', marginTop: '8px' }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px 4px', marginTop: '8px' }}>
             {TABS.map(t => (
-              <button key={t} onClick={() => setTab(t)} style={{ flex: 1, background: tab === t ? '#0D1B2A' : 'transparent', border: `1px solid ${tab === t ? '#0F2033' : 'transparent'}`, color: tab === t ? '#E2E8F0' : '#4A7C9E', padding: '7px 4px', borderRadius: '6px', fontSize: '9px', letterSpacing: '0.08em', textTransform: 'uppercase', cursor: 'pointer', fontFamily: "'Courier New',monospace", transition: 'all 0.2s' }}>{t}</button>
+              <button key={t} onClick={() => setTab(t)} style={{ flex: '1 0 30%', background: tab === t ? '#0D1B2A' : 'transparent', border: `1px solid ${tab === t ? '#0F2033' : 'transparent'}`, color: tab === t ? '#E2E8F0' : '#4A7C9E', padding: '6px 2px', borderRadius: '6px', fontSize: '9px', letterSpacing: '0.08em', textTransform: 'uppercase', cursor: 'pointer', fontFamily: "'Courier New',monospace", transition: 'all 0.2s' }}>{t}</button>
             ))}
           </div>
         </div>
@@ -175,6 +276,127 @@ export default function Dashboard({ currentUser, onClose, onLogout, onUpdateUser
                       No signals available for your tier. Seed the database: <code style={{ color: '#A8C4D8' }}>cd server && npm run db:seed</code>
                     </div>
                   )}
+                </div>
+              )}
+            </>
+          )}
+
+          {/* CHARTS */}
+          {tab === 'Charts' && (
+            <>
+              <div style={{ fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase', color: '#4A7C9E', marginBottom: '12px' }}>TradingView Pro Charts</div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '6px', marginBottom: '16px' }}>
+                {CHART_ASSETS.map(asset => {
+                  const isSelected = activeChart.symbol === asset.symbol
+                  return (
+                    <button
+                      key={asset.symbol}
+                      onClick={() => setActiveChart(asset)}
+                      style={{
+                        background: isSelected ? 'rgba(0,180,216,0.12)' : '#0D1B2A',
+                        border: `1px solid ${isSelected ? '#00B4D8' : '#0F2033'}`,
+                        color: isSelected ? '#E2E8F0' : '#4A7C9E',
+                        padding: '8px 4px',
+                        borderRadius: '6px',
+                        fontSize: '9px',
+                        fontWeight: isSelected ? 'bold' : 'normal',
+                        cursor: 'pointer',
+                        fontFamily: "'Courier New',monospace",
+                        textAlign: 'center',
+                        transition: 'all 0.15s'
+                      }}
+                      onMouseEnter={e => {
+                        if (!isSelected) e.currentTarget.style.border = '1px solid rgba(0,180,216,0.4)'
+                      }}
+                      onMouseLeave={e => {
+                        if (!isSelected) e.currentTarget.style.border = '1px solid #0F2033'
+                      }}
+                    >
+                      {asset.name}
+                    </button>
+                  )
+                })}
+              </div>
+              <TradingViewWidget symbol={activeChart.symbol} />
+              <div style={{ fontSize: '9px', color: '#4A7C9E', marginTop: '12px', lineHeight: '1.5', textAlign: 'center', fontFamily: "'Courier New', monospace" }}>
+                Real-time advanced TradingView charts feed. Optimized in dark mode for institutional grade indicators.
+              </div>
+            </>
+          )}
+
+          {/* HISTORY */}
+          {tab === 'History' && (
+            <>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
+                <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#00B4D8', display: 'inline-block' }} />
+                <span style={{ fontSize: '11px', fontWeight: 700, color: '#E2E8F0', letterSpacing: '0.1em' }}>SIGNAL HISTORY LOG</span>
+                <span style={{ fontSize: '8px', background: 'rgba(0, 180, 216, 0.08)', color: '#00B4D8', border: '1px solid rgba(0, 180, 216, 0.2)', padding: '2px 8px', borderRadius: '3px' }}>LAST 20</span>
+              </div>
+
+              {historyLoading ? (
+                <div style={{ fontSize: '11px', color: '#4A7C9E', padding: '24px 0', textAlign: 'center' }}>Loading history log…</div>
+              ) : historyError ? (
+                <div style={{ background: '#FF4D4D0F', border: '1px solid #FF4D4D33', borderRadius: '8px', padding: '14px', fontSize: '11px', color: '#FF4D4D' }}>
+                  {historyError}
+                </div>
+              ) : (
+                <div style={{ background: '#0D1B2A', border: '1px solid #0F2033', borderRadius: '10px', overflowX: 'auto' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '11px', textAlign: 'left', fontFamily: "'Courier New', monospace" }}>
+                    <thead>
+                      <tr style={{ borderBottom: '1px solid #0F2033', background: 'rgba(13, 27, 42, 0.5)' }}>
+                        <th style={{ padding: '10px 12px', color: '#4A7C9E', fontSize: '9px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Asset</th>
+                        <th style={{ padding: '10px 12px', color: '#4A7C9E', fontSize: '9px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Type</th>
+                        <th style={{ padding: '10px 12px', color: '#4A7C9E', fontSize: '9px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Entry</th>
+                        <th style={{ padding: '10px 12px', color: '#4A7C9E', fontSize: '9px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Time</th>
+                        <th style={{ padding: '10px 12px', color: '#4A7C9E', fontSize: '9px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {historySignals.map((s, i) => {
+                        const timeStr = new Date(s.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                        return (
+                          <tr
+                            key={s.id}
+                            onClick={() => onSignalClick && onSignalClick(s)}
+                            style={{ borderBottom: i < historySignals.length - 1 ? '1px solid #0F2033' : 'none', cursor: 'pointer', transition: 'background 0.15s' }}
+                            onMouseEnter={e => e.currentTarget.style.background = 'rgba(0,180,216,0.04)'}
+                            onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                          >
+                            <td style={{ padding: '12px 12px', fontWeight: 700, color: '#E2E8F0' }}>{s.asset}</td>
+                            <td style={{ padding: '12px 12px' }}>
+                              <span style={{
+                                color: s.up ? '#00D26A' : '#FF4D4D',
+                                fontWeight: 'bold'
+                              }}>
+                                {s.action}
+                              </span>
+                            </td>
+                            <td style={{ padding: '12px 12px', color: '#A8C4D8' }}>{s.entry}</td>
+                            <td style={{ padding: '12px 12px', color: '#4A7C9E' }}>{timeStr}</td>
+                            <td style={{ padding: '12px 12px' }}>
+                              <span style={{
+                                fontSize: '9px',
+                                padding: '1px 6px',
+                                borderRadius: '3px',
+                                background: s.status === 'OPEN' ? '#00D26A14' : 'rgba(74, 104, 128, 0.15)',
+                                color: s.status === 'OPEN' ? '#00D26A' : '#4A7C9E',
+                                border: `1px solid ${s.status === 'OPEN' ? '#00D26A33' : '#4A688040'}`
+                              }}>
+                                {s.status === 'OPEN' ? 'Active' : 'Closed'}
+                              </span>
+                            </td>
+                          </tr>
+                        )
+                      })}
+                      {historySignals.length === 0 && (
+                        <tr>
+                          <td colSpan="5" style={{ padding: '24px', textAlign: 'center', color: '#4A7C9E' }}>
+                            No signal history recorded yet.
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
                 </div>
               )}
             </>

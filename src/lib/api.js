@@ -69,6 +69,7 @@ export const api = {
 
   signals: {
     list: () => request('/api/signals'),
+    history: () => request('/api/signals/history'),
   },
 }
 
