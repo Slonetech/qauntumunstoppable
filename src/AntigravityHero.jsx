@@ -1,19 +1,18 @@
 import { useEffect, useRef, useState } from 'react'
 import { useBreakpoint } from './hooks/useBreakpoint.js'
 import { scrollToSection } from './lib/scroll.js'
+import { useLivePrices } from './lib/useLivePrices.js'
 
-/* ─── Static data ─────────────────────────────────────────────────────── */
-const TICKER = [
-  { pair: 'BTC/USD', price: '67,842.50', change: '+2.34%', up: true },
-  { pair: 'ETH/USD', price: '3,521.80',  change: '+1.87%', up: true },
-  { pair: 'EUR/USD', price: '1.0921',    change: '-0.12%', up: false },
-  { pair: 'XAU/USD', price: '2,341.60',  change: '+0.78%', up: true },
-  { pair: 'GBP/USD', price: '1.2648',    change: '-0.09%', up: false },
-  { pair: 'SOL/USD', price: '182.40',    change: '+4.21%', up: true },
-  { pair: 'NAS100',  price: '19,284.00', change: '+0.55%', up: true },
-  { pair: 'USD/JPY', price: '154.32',    change: '+0.31%', up: true },
-  { pair: 'XRP/USD', price: '0.6182',    change: '-1.44%', up: false },
-  { pair: 'SPX500',  price: '5,432.10',  change: '+0.22%', up: true },
+/* ─── Static Data & Constants ─────────────────────────────────────────── */
+const ASSETS_ORDER = [
+  'BTC/USD',
+  'ETH/USD',
+  'XRP/USD',
+  'XAU/USD',
+  'EUR/USD',
+  'GBP/USD',
+  'SPX500',
+  'NASDAQ'
 ]
 
 const SIGNALS = [
@@ -49,42 +48,17 @@ const NAV_TARGETS = {
 export default function AntigravityHero({ currentUser, onLogin, onRegister, onDashboard, onSignalClick }) {
   const { isMobile, isTablet } = useBreakpoint()
   const [menuOpen, setMenuOpen] = useState(false)
+  const prices = useLivePrices()
 
-  const tickerInnerRef = useRef(null)
-  const tickerOuterRef = useRef(null)
   const sigCountRef    = useRef(null)
   const statWrRef      = useRef(null)
   const statVolRef     = useRef(null)
   const statTrRef      = useRef(null)
   const statLatRef     = useRef(null)
   const signalRowRefs  = useRef([])
-  const rafRef         = useRef(null)
   const intervalRef    = useRef(null)
 
   useEffect(() => {
-    /* ── Ticker build & animate ── */
-    const inner = tickerInnerRef.current
-    ;[...TICKER, ...TICKER, ...TICKER].forEach(item => {
-      const el = document.createElement('div')
-      el.className = 'ticker-item'
-      el.innerHTML = `
-        <span style="font-size:11px;color:#6B8FA8;letter-spacing:0.06em">${item.pair}</span>
-        <span style="font-size:12px;font-weight:700;color:#E2E8F0">${item.price}</span>
-        <span style="font-size:10px;font-weight:700;color:${item.up ? '#00D26A' : '#FF4D4D'}">${item.change}</span>
-      `
-      inner.appendChild(el)
-    })
-
-    let offset = 0
-    const singleW = TICKER.length * 180
-    const tick = () => {
-      offset -= 0.5
-      if (Math.abs(offset) >= singleW) offset = 0
-      inner.style.transform = `translateX(${offset}px)`
-      rafRef.current = requestAnimationFrame(tick)
-    }
-    rafRef.current = requestAnimationFrame(tick)
-
     /* ── Signal row entrance animation ── */
     signalRowRefs.current.forEach((tr, i) => {
       if (!tr) return
@@ -109,7 +83,6 @@ export default function AntigravityHero({ currentUser, onLogin, onRegister, onDa
     }, 3500)
 
     return () => {
-      cancelAnimationFrame(rafRef.current)
       clearInterval(intervalRef.current)
     }
   }, [])
@@ -198,11 +171,26 @@ export default function AntigravityHero({ currentUser, onLogin, onRegister, onDa
         </nav>
 
         {/* ── TICKER ── */}
-        <div style={{ background: '#0D1B2A', borderBottom: '1px solid #0F2033', overflow: 'hidden', position: 'relative', zIndex: 10, touchAction: 'pan-x', WebkitOverflowScrolling: 'touch' }}>
+        <div id="markets" style={{ background: '#0D1B2A', borderBottom: '1px solid #0F2033', overflow: 'hidden', position: 'relative', zIndex: 10 }}>
           <div style={{ display: 'flex', alignItems: 'center' }}>
             <div style={{ background: '#00B4D8', color: '#000', fontSize: '9px', fontWeight: 700, letterSpacing: '0.14em', padding: '8px 14px', whiteSpace: 'nowrap', flexShrink: 0, zIndex: 2 }}>LIVE MARKETS</div>
-            <div style={{ overflow: 'hidden', flex: 1 }} ref={tickerOuterRef}>
-              <div className="ticker-track" ref={tickerInnerRef} />
+            <div style={{ overflow: 'hidden', flex: 1 }}>
+              <div className="ticker-track" style={{ display: 'flex', animation: 'tickerScroll 25s linear infinite', width: 'max-content' }}>
+                {[...ASSETS_ORDER, ...ASSETS_ORDER].map((pair, idx) => {
+                  const item = prices[pair] || { price: '—', change: '—', up: null }
+                  const changeColor = item.up === true ? '#00D26A' : item.up === false ? '#FF4D4D' : '#4A7C9E'
+                  const changeIcon = item.up === true ? '▲' : item.up === false ? '▼' : ''
+                  return (
+                    <div key={`${pair}-${idx}`} className="ticker-item" style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 20px', borderRight: '1px solid #0F2033', minWidth: '180px', flexShrink: 0 }}>
+                      <span style={{ fontSize: '11px', color: '#6B8FA8', letterSpacing: '0.06em' }}>{pair}</span>
+                      <span style={{ fontSize: '12px', fontWeight: 700, color: '#E2E8F0' }}>{item.price}</span>
+                      <span style={{ fontSize: '10px', fontWeight: 700, color: changeColor }}>
+                        {changeIcon} {item.change}
+                      </span>
+                    </div>
+                  )
+                })}
+              </div>
             </div>
           </div>
         </div>

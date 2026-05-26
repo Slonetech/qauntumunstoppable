@@ -1,3 +1,12 @@
 * { box-sizing: border-box; }
 html { overflow-x: hidden; }
 body { overflow-x: hidden; min-width: 320px; }
+
+@keyframes tickerScroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
