@@ -102,8 +102,8 @@ model Signal {
   timeframe     String
   modelVersion  String
   status        String   @default("OPEN")
+  tier          Tier     @default(STARTER)
   createdAt     DateTime @default(now())
-
   @@index([asset])
   @@index([createdAt])
 }
